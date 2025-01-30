@@ -1,3 +1,10 @@
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "bentoml",
+#     "easyocr",
+# ]
+# ///
 import bentoml
 import easyocr
 

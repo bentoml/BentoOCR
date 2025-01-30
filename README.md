@@ -26,7 +26,8 @@ Make sure to install [uv](https://docs.astral.sh/uv/)
 ```bash
 git clone https://github.com/bentoml/BentoOCR.git && cd BentoOCR
 
-uv run service
+uv run import_model.py
+uv run service.py
 ```
 
 To serve the model with BentoML:

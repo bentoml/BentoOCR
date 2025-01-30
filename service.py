@@ -1,79 +1,29 @@
 from __future__ import annotations
 
-import io
-import os
-import typing as t
-import asyncio
-
-import numpy as np
-import torch
-
+import typing
+import pathlib
 import bentoml
-from warmup import convert_pdf_to_images
-from warmup import download_models
+import easyocr
+import numpy
 
-if t.TYPE_CHECKING:
-    import PIL.Image
-    from detectron2.structures import Boxes
-    from detectron2.structures import Instances
-
-# Download Model
-reader_model, predictor_model = download_models()
-en_reader = reader_model.to_runner()
-processor = predictor_model.to_runner()
-
-THRESHOLD = float(os.getenv("OCR_THRESHOLD", 0.8))
-
-svc = bentoml.Service(name="document-processing", runners=[en_reader, processor])
+Image = typing.Annotated[pathlib.Path, bentoml.validators.ContentType('image/*')]
 
 
-async def segmentation(im: PIL.Image.Image) -> tuple[list[int], list[float], Boxes]:
-    output: Instances = (await processor.async_run(np.asarray(im)))["instances"]
-    return (
-        output.get("pred_classes").tolist(),
-        output.get("scores").tolist(),
-        output.get("pred_boxes"),
+@bentoml.service(resources={'gpu': 1}, image=bentoml.images.PythonImage(python_version='3.11'))
+class OCRService:
+  models = bentoml.models.BentoModel('easyocr--ch-en')
+
+  def __init__(self):
+    self.reader = easyocr.Reader(
+      ['ch_sim', 'en'], model_storage_directory=self.models.path, download_enabled=False, gpu=True
     )
 
+  @bentoml.api()
+  def detect(self, image: Image) -> list[numpy.ndarray]:
+    detections = self.reader.readtext(str(image))
+    return [{'text': text, 'bbox': numpy.array(bbox).tolist()} for (bbox, text, _) in detections]
 
-async def preprocess(im: PIL.Image.Image, res: list[str], threshold: float = 0.8):
-    async def _proc_cls_scores(
-        cls: int, score: float, box: torch.Tensor, im: PIL.Image.Image
-    ):
-        # 4 table
-        if cls != 4 and score >= threshold:
-            join_char = "" if cls == 0 else " "
-            text = join_char.join(
-                [
-                    t[1]
-                    for t in await en_reader.readtext.async_run(
-                        np.asarray(im.crop(box.numpy()))
-                    )
-                ]
-            )
-            # ignore annotations for table footer
-            if not text.startswith("Figure") or not text.startswith("Table"):
-                print("Extract text:", text)
-                res.append(text)
-
-    classes, scores, boxes = await segmentation(im)
-
-    return await asyncio.gather(
-        *[
-            _proc_cls_scores(cls, score, box, im)
-            for cls, score, box in zip(classes, scores, boxes)
-        ]
-    )
-
-
-@svc.api(input=bentoml.io.File(mime_type="application/pdf"), output=bentoml.io.JSON())
-async def image_to_text(file: io.BytesIO) -> dict[t.Literal["parsed"], str]:
-    res = []
-    with file:
-        await asyncio.gather(
-            *[
-                preprocess(im, res, THRESHOLD)
-                for im in convert_pdf_to_images(file.read())
-            ]
-        )
-    return {"parsed": "\n".join(res)}
+  @bentoml.api()
+  def classify(self, image: Image) -> list[dict]:
+    detections = self.reader.readtext(str(image))
+    return [{'text': text, 'confidence': confidence} for (_, text, confidence) in detections]

@@ -1,3 +1,10 @@
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "bentoml",
+#     "easyocr",
+# ]
+# ///
 from __future__ import annotations
 
 import typing
@@ -27,3 +34,5 @@ class OCRService:
   def classify(self, image: Image) -> list[dict]:
     detections = self.reader.readtext(str(image))
     return [{'text': text, 'confidence': confidence} for (_, text, confidence) in detections]
+
+if __name__ == "__main__": OCRService.serve_http(port=3000)

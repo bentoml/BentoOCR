@@ -26,14 +26,15 @@ Make sure to install [uv](https://docs.astral.sh/uv/)
 ```bash
 git clone https://github.com/bentoml/BentoOCR.git && cd BentoOCR
 
-uv run import_model.py
-uv run service.py
+uv venv
+
+python import_model.py
 ```
 
 To serve the model with BentoML:
 
-```
-uv run service.py
+```bash
+bentoml serve
 ```
 
 You can then open your browser at http://127.0.0.1:3000 and interact with the service through Swagger UI.
@@ -66,7 +67,7 @@ Effortlessly transition your project into a production-ready application using [
 Start by creating a BentoCloud account. Once you've signed up, log in to your BentoCloud account using the command:
 
 ```bash
-uv run bentoml cloud login --api-token <your-api-token> --endpoint <bento-cloud-endpoint>
+bentoml cloud login --api-token <your-api-token> --endpoint <bento-cloud-endpoint>
 ```
 
 > Note: Replace `<your-api-token>` and `<bento-cloud-endpoint>` with your specific API token and the BentoCloud endpoint respectively.
@@ -74,13 +75,13 @@ uv run bentoml cloud login --api-token <your-api-token> --endpoint <bento-cloud-
 Next, build your BentoML service using the `build` command:
 
 ```bash
-uv run bentoml build
+bentoml build
 ```
 
 Then, push your freshly-built Bento service to BentoCloud using the `push` command:
 
 ```bash
-uv run bentoml push <name:version>
+bentoml push <name:version>
 ```
 
 Lastly, deploy this application to BentoCloud with a single `bentoml deployment create` command following the [deployment instructions](https://docs.bentoml.org/en/latest/reference/cli.html#bentoml-deployment-create).

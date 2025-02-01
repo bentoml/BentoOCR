@@ -10,11 +10,12 @@ from __future__ import annotations
 import typing
 import pathlib
 import bentoml
-import easyocr
 import numpy
 
 Image = typing.Annotated[pathlib.Path, bentoml.validators.ContentType('image/*')]
 
+with bentoml.importing():
+  import easyocr
 
 @bentoml.service(resources={'gpu': 1}, image=bentoml.images.PythonImage(python_version='3.11'))
 class OCRService:
@@ -26,7 +27,7 @@ class OCRService:
     )
 
   @bentoml.api()
-  def detect(self, image: Image) -> list[numpy.ndarray]:
+  def detect(self, image: Image) -> list[dict]:
     detections = self.reader.readtext(str(image))
     return [{'text': text, 'bbox': numpy.array(bbox).tolist()} for (bbox, text, _) in detections]
 
@@ -35,4 +36,5 @@ class OCRService:
     detections = self.reader.readtext(str(image))
     return [{'text': text, 'confidence': confidence} for (_, text, confidence) in detections]
 
-if __name__ == "__main__": OCRService.serve_http(port=3000)
+if __name__ == "__main__":
+  OCRService.serve_http(port=3000)

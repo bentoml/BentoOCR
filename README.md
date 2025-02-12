@@ -26,7 +26,7 @@ Make sure to install [uv](https://docs.astral.sh/uv/)
 ```bash
 git clone https://github.com/bentoml/BentoOCR.git && cd BentoOCR
 
-uv venv
+pip install -r requirements.txt
 
 python import_model.py
 ```

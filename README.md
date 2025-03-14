@@ -1,94 +1,86 @@
 <div align="center">
-    <h1 align="center">BentoOCR</h1>
-    <br>
-    <strong>Turn any OCR models into online inference API endpoint 🚀<br></strong>
-    <i>Powered by BentoML 🍱</i>
-    <br>
+    <h1 align="center">Turning OCR Models into Inference APIs with BentoML</h1>
 </div>
-<br>
 
-## 📖 Introduction 📖
+This is a BentoML example project that demonstrates how to serve an OCR model. It accepts images as input and returns the text contained within. While the example uses [EasyOCR](https://github.com/JaidedAI/EasyOCR), you can choose any other OCR model.
 
-This project demonstrates how to effortlessly serve an OCR model using BentoML. It accepts PDFs as input and returns the text contained within. The service uses [EasyOCR](https://github.com/JaidedAI/EasyOCR) for OCR.
+See [here](https://docs.bentoml.com/en/latest/examples/overview.html) for a full list of BentoML example projects.
 
-## 🏃‍♂️ Running the Service 🏃‍♂️
+## Install dependencies
 
-### BentoML CLI
+1. Make sure to install [uv](https://docs.astral.sh/uv/).
+2. Clone the repo and install dependencies.
 
-#### **Prerequisite 📋**
+   ```bash
+   git clone https://github.com/bentoml/BentoOCR.git && cd BentoOCR
 
-#### ✅ Python
+   # Recommend Python 3.11
+   pip install -r requirements.txt
+   ```
 
-This project requires Python 3.10 or higher.
+## Save the model
 
-Make sure to install [uv](https://docs.astral.sh/uv/)
+Import the model into the [BentoML Model Store](https://docs.bentoml.com/en/latest/build-with-bentoml/model-loading-and-management.html).
 
 ```bash
-git clone https://github.com/bentoml/BentoOCR.git && cd BentoOCR
-
-pip install -r requirements.txt
-
 python import_model.py
 ```
 
-To serve the model with BentoML:
+## Run the BentoML Service
+
+We have defined a BentoML Service in `service.py` to serve the model. To start it, run:
 
 ```bash
 bentoml serve
 ```
 
-You can then open your browser at http://127.0.0.1:3000 and interact with the service through Swagger UI.
+The server is now active at [http://localhost:3000](http://localhost:3000/). It exposes two API endpoints:
 
-## 🌐 Interacting with the Service 🌐
+- `detect`: Takes an image as input and returns a list of detected text regions. Each detection includes the extracted text and the bounding box coordinates of where the text was found in the image.
+- `classify`: Takes an image as input and returns a list with the extracted text and the confidence score for each text detection.
 
-BentoML's default model serving method is through an HTTP server. In this section, we demonstrate various ways to interact with the service:
+You can call these endpoints using the Swagger UI or in other different ways.
 
 ### cURL
 
 ```bash
 curl -X 'POST' \
-  'http://localhost:3000/image_to_text' \
-  -H 'accept: application/pdf' \
+  'http://localhost:3000/detect' \
+  -H 'accept: application/json' \
   -H 'Content-Type: multipart/form-data' \
-  -F file=@path-to-pdf
+  -F 'image=@sample-image.png;type=image/png'
 ```
 
-> Replace `path-to-pdf` with the file path of the PDF you want to send to the service.
+### Python client
 
-### Swagger UI
+```python
+import bentoml
+from pathlib import Path
 
-You can use Swagger UI to quickly explore the available endpoints of any BentoML service.
-![Swagger UI](images/swagger.png)
+with bentoml.SyncHTTPClient("http://localhost:3000/") as client:
+    result = client.detect(
+        image=Path("image.jpg"),
+    )
+```
 
-## 🚀 Deploying to Production 🚀
+## Deploy to BentoCloud
 
-Effortlessly transition your project into a production-ready application using [BentoCloud](https://www.bentoml.com/bento-cloud/), the production-ready platform for managing and deploying machine learning models.
+After the Service is ready, you can deploy the application to BentoCloud for better management and scalability. [Sign up](https://www.bentoml.com/) if you haven't got a BentoCloud account.
 
-Start by creating a BentoCloud account. Once you've signed up, log in to your BentoCloud account using the command:
+Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/scale-with-bentocloud/manage-api-tokens.html).
 
 ```bash
-bentoml cloud login --api-token <your-api-token> --endpoint <bento-cloud-endpoint>
+bentoml cloud login
 ```
 
-> Note: Replace `<your-api-token>` and `<bento-cloud-endpoint>` with your specific API token and the BentoCloud endpoint respectively.
-
-Next, build your BentoML service using the `build` command:
+Deploy it to BentoCloud:
 
 ```bash
-bentoml build
+bentoml deploy
 ```
 
-Then, push your freshly-built Bento service to BentoCloud using the `push` command:
+Once the application is up and running on BentoCloud, you can access it via the exposed URL.
 
-```bash
-bentoml push <name:version>
-```
+## Community
 
-Lastly, deploy this application to BentoCloud with a single `bentoml deployment create` command following the [deployment instructions](https://docs.bentoml.org/en/latest/reference/cli.html#bentoml-deployment-create).
-
-BentoML offers a number of options for deploying and hosting online ML services into production, learn more at [Deploying a Bento](https://docs.bentoml.org/en/latest/concepts/deploy.html).
-
-## 👥 Community 👥
-
-BentoML has a thriving open source community where thousands of ML/AI practitioners are
-contributing to the project, helping other users and discussing the future of AI. 👉 [Pop into our Slack community!](https://l.bentoml.com/join-slack)
+BentoML has a thriving open source community where thousands of ML/AI practitioners are contributing to the project, helping other users and discussing the future of AI. 👉 [Pop into our Slack community!](https://l.bentoml.com/join-slack)

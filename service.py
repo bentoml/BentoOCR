@@ -12,6 +12,7 @@ with bentoml.importing():
 
 
 @bentoml.service(
+    name="bentoocr",
     resources={'gpu': 1}, image=bentoml.images.PythonImage(python_version='3.11').requirements_file('requirements.txt')
 )
 class OCRService:

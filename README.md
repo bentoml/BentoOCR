@@ -1,5 +1,5 @@
 <div align="center">
-    <h1 align="center">Turning OCR Models into Inference APIs with BentoML</h1>
+    <h1 align="center">Turning OCR Models into APIs with BentoML</h1>
 </div>
 
 This is a BentoML example project that demonstrates how to serve an OCR model. It accepts images as input and returns the text contained within. While the example uses [EasyOCR](https://github.com/JaidedAI/EasyOCR), you can choose any other OCR model.

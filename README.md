@@ -4,8 +4,6 @@
 
 This is a BentoML example project that demonstrates how to serve an OCR model. It accepts images as input and returns the text contained within. While the example uses [EasyOCR](https://github.com/JaidedAI/EasyOCR), you can choose any other OCR model.
 
-See [here](https://docs.bentoml.com/en/latest/examples/overview.html) for a full list of BentoML example projects.
-
 ## Install dependencies
 
 1. Make sure to install [uv](https://docs.astral.sh/uv/).
@@ -63,24 +61,6 @@ with bentoml.SyncHTTPClient("http://localhost:3000/") as client:
     )
 ```
 
-## Deploy to BentoCloud
-
-After the Service is ready, you can deploy the application to BentoCloud for better management and scalability. [Sign up](https://www.bentoml.com/) if you haven't got a BentoCloud account.
-
-Make sure you have [logged in to BentoCloud](https://docs.bentoml.com/en/latest/scale-with-bentocloud/manage-api-tokens.html).
-
-```bash
-bentoml cloud login
-```
-
-Deploy it to BentoCloud:
-
-```bash
-bentoml deploy
-```
-
-Once the application is up and running on BentoCloud, you can access it via the exposed URL.
-
 ## Community
 
-BentoML has a thriving open source community where thousands of ML/AI practitioners are contributing to the project, helping other users and discussing the future of AI. 👉 [Pop into our Slack community!](https://l.bentoml.com/join-slack)
+If you have any questions, feel free to reach out and [join our community forum](https://forum.modular.com/c/bento/31).
